@@ -58,9 +58,9 @@ router.get('/', authenticateToken, (req: AuthRequest, res: Response) => {
 
 // Create new expense
 router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
-  const { description, amount, category, date, splits } = req.body;
+  const { organization_id, description, amount, category, date, splits } = req.body;
 
-  if (!description || !amount || !date || !splits || splits.length === 0) {
+  if (!organization_id || !description || !amount || !date || !splits || splits.length === 0) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -71,10 +71,11 @@ router.post('/', authenticateToken, (req: AuthRequest, res: Response) => {
   }
 
   db.run(
-    'INSERT INTO expenses (description, amount, paid_by, category, date) VALUES (?, ?, ?, ?, ?)',
-    [description, amount, req.userId, category || 'Other', date],
+    'INSERT INTO expenses (organization_id, description, amount, paid_by, category, date) VALUES (?, ?, ?, ?, ?, ?)',
+    [organization_id, description, amount, req.userId, category || 'Other', date],
     function (err) {
       if (err) {
+        console.error('Error creating expense:', err);
         return res.status(500).json({ error: 'Error creating expense' });
       }
 
